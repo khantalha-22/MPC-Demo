@@ -1,0 +1,89 @@
+.mode-selection-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0b0c10;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.mode-selection-box {
+  background: #111216;
+  border: 1px solid #1f2128;
+  border-radius: 16px;
+  padding: 48px;
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ms-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #fff;
+}
+
+.ms-desc {
+  font-size: 16px;
+  color: #888;
+  margin: 0 0 40px 0;
+}
+
+.ms-options {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.ms-option-card {
+  flex: 1;
+  background: #18191e;
+  border: 1px solid #2a2d36;
+  border-radius: 12px;
+  padding: 32px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ms-option-card:hover {
+  border-color: #4CAF50;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.1);
+}
+
+.ms-option-card:hover .ms-icon-wrap {
+  transform: scale(1.1);
+}
+
+.ms-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #22252e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.ms-option-card h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+  color: #fff;
+}
+
+.ms-option-card p {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0;
+  line-height: 1.5;
+}

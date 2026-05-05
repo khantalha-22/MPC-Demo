@@ -1,0 +1,122 @@
+.phone-frame-wrapper {
+  width: 375px;
+  height: 812px;
+  background-color: #111;
+  border-radius: 40px;
+  box-shadow: 0 0 0 10px #111, 0 0 0 11px #333, 0 10px 40px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-screen {
+  background-color: #f5f6fa;
+  flex: 1;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.status-bar {
+  height: 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  background: white;
+  z-index: 100;
+}
+
+.status-bar-icons {
+  display: flex;
+  gap: 6px;
+}
+
+.mobile-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background-color: #111;
+  border-radius: 100px;
+  z-index: 100;
+}
+
+/* Common mobile styles */
+.m-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 16px;
+  background: white;
+}
+
+.m-title {
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+  margin-right: 24px; /* to offset back button */
+}
+
+.m-back {
+  cursor: pointer;
+  color: #111;
+}
+
+.m-btn-primary {
+  background: var(--color-primary-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  text-align: center;
+}
+
+.m-btn-outline {
+  background: white;
+  color: #111;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  text-align: center;
+}
+
+.m-btn-danger-outline {
+  background: white;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  text-align: center;
+}
