@@ -39,6 +39,7 @@ export const InviteModal: React.FC = () => {
   const [permSign, setPermSign] = useState(false);
 
   const hasProductTransfers = selectedRoles.has('product_transfers');
+  const hasPactveraRoles = selectedRoles.has('pactvera_admin') || selectedRoles.has('pactvera_signer');
 
   useEffect(() => {
     if (hasProductTransfers) {
@@ -48,6 +49,12 @@ export const InviteModal: React.FC = () => {
       }
     }
   }, [hasProductTransfers]);
+
+  useEffect(() => {
+    if (hasPactveraRoles) {
+      setPermSign(true);
+    }
+  }, [hasPactveraRoles]);
 
   const toggleRole = (id: string) => {
     const newRoles = new Set(selectedRoles);
@@ -196,6 +203,11 @@ export const InviteModal: React.FC = () => {
                     <Zap size={14} /> Wallet permission 'Transfers — ERC721' will be auto-enabled.
                   </div>
                 )}
+                {hasPactveraRoles && (
+                  <div className="info-callout">
+                    <Zap size={14} /> Wallet permission 'Allow Pactvera signing' will be auto-enabled.
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -291,9 +303,11 @@ export const InviteModal: React.FC = () => {
                       type="checkbox" 
                       className="checkbox"
                       checked={permSign}
-                      onChange={(e) => setPermSign(e.target.checked)}
+                      onChange={(e) => !hasPactveraRoles && setPermSign(e.target.checked)}
+                      disabled={hasPactveraRoles}
                     />
                     Allow Pactvera signing
+                    {hasPactveraRoles && <Lock size={14} className="locked-icon" />}
                   </div>
                 </div>
               </div>

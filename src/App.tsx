@@ -9,10 +9,11 @@ import { InviteModal } from './components/InviteModal';
 import { PhoneFrame } from './components/PhoneFrame';
 import { ModeSelection } from './components/ModeSelection';
 import { WalletPermissionsPage } from './components/WalletPermissionsPage';
-import { Maximize2 } from 'lucide-react';
+import { AdminDetail } from './components/AdminDetail';
+import { X } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { phase, webView, isInviteModalOpen, demoOption } = useAppContext();
+  const { phase, setPhase, webView, isInviteModalOpen, demoOption } = useAppContext();
 
   if (demoOption === null) {
     return <ModeSelection />;
@@ -28,26 +29,18 @@ const AppContent: React.FC = () => {
             {webView === 'DASHBOARD' && <Dashboard />}
             {webView === 'USER_MANAGEMENT' && <UserManagement />}
             {webView === 'WALLET_PERMISSIONS' && <WalletPermissionsPage />}
+            {webView === 'USER_DETAIL' && <AdminDetail />}
           </div>
           
-          <div className={`floating-pill ${webView === 'DASHBOARD' ? 'top-right' : 'bottom-left'}`}>
-            <div className="floating-pill-header">
-              <span>Onboarding Checklist</span>
-              <Maximize2 size={14} color="#888" />
-            </div>
-            <div className="progress-bar-bg">
-              <div className="progress-bar-fill"></div>
-            </div>
-            <div className="progress-text">
-              <span>83% Completed</span>
-              <span>5 of 6 Steps Completed</span>
-            </div>
-          </div>
+
         </div>
         {isInviteModalOpen && <InviteModal />}
       </div>
 
       <div className={`mobile-phase-container ${phase === 'SPLIT' ? 'visible' : ''}`}>
+        <button className="close-mobile-btn" onClick={() => setPhase('WEB')}>
+          <X size={24} />
+        </button>
         <PhoneFrame />
       </div>
     </div>

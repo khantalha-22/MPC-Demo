@@ -34,43 +34,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">Onboarding Checklist</div>
-          <div className="badge in-progress">IN PROGRESS</div>
-        </div>
-        
-        <div className="task-list-header">
-          <span>Sub-Tasks</span>
-          <span>5/6 Tasks Completed</span>
-        </div>
 
-        <div className="task-list">
-          {[
-            'Complete Authority to Create Organization',
-            'Provide Officer List',
-            'Officer List Validation',
-            'Upload Governing Documents and Shareholder List',
-            'Governing Documents Attestation'
-          ].map((task, index) => (
-            <div className="task-row" key={index}>
-              <div className="task-info">
-                <div className="task-number">{index + 1}</div>
-                {task}
-              </div>
-              <CheckCircle2 size={18} color="#4CAF50" />
-            </div>
-          ))}
-          
-          <div className="task-row">
-            <div className="task-info incomplete">
-              <div className="task-number">6</div>
-              Statutory Management Authority
-            </div>
-            <button className="btn-outline">Guide</button>
-          </div>
-        </div>
-      </div>
 
       <div className="card">
         <div className="card-header">

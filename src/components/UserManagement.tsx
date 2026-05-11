@@ -4,7 +4,7 @@ import { Search, List, Grid, Users, Plus, MoreVertical } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 export const UserManagement: React.FC = () => {
-  const { setIsInviteModalOpen, admins } = useAppContext();
+  const { setIsInviteModalOpen, admins, setSelectedAdminId, setWebView } = useAppContext();
 
   const pendingCount = admins.filter(a => a.status === 'Pending').length;
 
@@ -63,7 +63,14 @@ export const UserManagement: React.FC = () => {
           </thead>
           <tbody>
             {admins.map(admin => (
-              <tr key={admin.id}>
+              <tr 
+                key={admin.id} 
+                onClick={() => {
+                  setSelectedAdminId(admin.id);
+                  setWebView('USER_DETAIL');
+                }}
+                className="clickable-row"
+              >
                 <td>{admin.id}</td>
                 <td>{admin.name}</td>
                 <td>{admin.email}</td>

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
 type Phase = 'WEB' | 'SPLIT';
-type WebView = 'DASHBOARD' | 'USER_MANAGEMENT' | 'WALLET_PERMISSIONS';
+type WebView = 'DASHBOARD' | 'USER_MANAGEMENT' | 'WALLET_PERMISSIONS' | 'USER_DETAIL';
 type MobileView = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'M7';
 type DemoOption = 'option1' | 'option2' | null;
 type AttestationFlowType = 'invite' | 'wallet';
@@ -11,6 +11,7 @@ interface Admin {
   id: string;
   name: string;
   email: string;
+  phoneNumber: string;
   roles: string[];
   walletPerms: {
     erc20: boolean;
@@ -57,6 +58,10 @@ interface AppContextType {
   setWalletPerms: (perms: any) => void;
   admins: Admin[];
   addAdmin: (admin: Omit<Admin, 'id' | 'status' | 'dateAdded'>) => void;
+  selectedAdminId: string | null;
+  setSelectedAdminId: (id: string | null) => void;
+  updateAdmin: (admin: Admin) => void;
+  removeAdmin: (id: string) => void;
   currentAdmin: Admin | null;
   resetDemo: () => void;
   finishMobileFlow: () => void;
@@ -89,6 +94,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: '1',
       name: 'Jane Doe',
       email: 'jane.doe@exp.com',
+      phoneNumber: '919722887770',
       roles: ['pactvera_admin', 'product_transfers'],
       walletPerms: {
         erc20: true,
@@ -106,6 +112,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: '2',
       name: 'Mark Howard',
       email: 'mark.h@exp.com',
+      phoneNumber: '919876543210',
       roles: ['pactvera_admin', 'tca_releasers'],
       walletPerms: {
         erc20: false,
@@ -122,6 +129,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   ];
 
   const [admins, setAdmins] = useState<Admin[]>(initialAdmins);
+  const [selectedAdminId, setSelectedAdminId] = useState<string | null>(null);
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
 
   const addAdmin = (newAdmin: Omit<Admin, 'id' | 'status' | 'dateAdded'>) => {
@@ -133,6 +141,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     setAdmins(prev => [...prev, admin]);
     setCurrentAdmin(admin);
+  };
+
+  const updateAdmin = (updatedAdmin: Admin) => {
+    setAdmins(prev => prev.map(a => a.id === updatedAdmin.id ? updatedAdmin : a));
+  };
+
+  const removeAdmin = (id: string) => {
+    setAdmins(prev => prev.filter(a => a.id !== id));
+    if (selectedAdminId === id) {
+      setSelectedAdminId(null);
+      setWebView('USER_MANAGEMENT');
+    }
   };
 
   const resetDemo = () => {
@@ -155,6 +175,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       signing: false
     });
     setAdmins(initialAdmins);
+    setSelectedAdminId(null);
     setCurrentAdmin(null);
   };
 
@@ -194,6 +215,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setWalletPerms,
         admins,
         addAdmin,
+        selectedAdminId,
+        setSelectedAdminId,
+        updateAdmin,
+        removeAdmin,
         currentAdmin,
         resetDemo,
         finishMobileFlow
