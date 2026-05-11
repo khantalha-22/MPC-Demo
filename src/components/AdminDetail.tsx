@@ -9,7 +9,6 @@ export const AdminDetail: React.FC = () => {
     selectedAdminId, 
     admins, 
     setWebView, 
-    setSelectedAdminId,
     updateAdmin,
     removeAdmin 
   } = useAppContext();
