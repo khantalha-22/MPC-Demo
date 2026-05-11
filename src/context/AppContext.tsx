@@ -11,7 +11,6 @@ interface Admin {
   id: string;
   name: string;
   email: string;
-  phoneNumber: string;
   roles: string[];
   walletPerms: {
     erc20: boolean;
@@ -94,7 +93,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: '1',
       name: 'Jane Doe',
       email: 'jane.doe@exp.com',
-      phoneNumber: '919722887770',
       roles: ['pactvera_admin', 'product_transfers'],
       walletPerms: {
         erc20: true,
@@ -112,7 +110,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       id: '2',
       name: 'Mark Howard',
       email: 'mark.h@exp.com',
-      phoneNumber: '919876543210',
       roles: ['pactvera_admin', 'tca_releasers'],
       walletPerms: {
         erc20: false,

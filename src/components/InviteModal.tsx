@@ -26,7 +26,6 @@ export const InviteModal: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
   
@@ -79,7 +78,7 @@ export const InviteModal: React.FC = () => {
     );
   };
 
-  const isStep1Valid = name.length > 2 && email.length > 5 && email.includes('@') && phoneNumber.length >= 10 && selectedRoles.size > 0;
+  const isStep1Valid = name.length > 2 && email.length > 5 && email.includes('@') && selectedRoles.size > 0;
 
   const handleNext = () => {
     if (demoOption === 'option1') {
@@ -110,7 +109,6 @@ export const InviteModal: React.FC = () => {
     addAdmin({
       name,
       email,
-      phoneNumber,
       roles: Array.from(selectedRoles),
       walletPerms: walletPermissions
     });
@@ -166,17 +164,6 @@ export const InviteModal: React.FC = () => {
                   placeholder="Enter email address" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Phone Number<span>*</span></label>
-                <input 
-                  type="tel" 
-                  className="form-input" 
-                  placeholder="Enter phone number" 
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
                 />
               </div>
 

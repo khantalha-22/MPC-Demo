@@ -203,10 +203,6 @@ export const AdminDetail: React.FC = () => {
                 <label>Email</label>
                 <p>{admin.email}</p>
               </div>
-              <div className="info-item">
-                <label>Phone Number</label>
-                <p>{admin.phoneNumber}</p>
-              </div>
             </div>
           </div>
         </div>
