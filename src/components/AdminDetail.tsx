@@ -5,12 +5,12 @@ import { useAppContext } from '../context/AppContext';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 export const AdminDetail: React.FC = () => {
-  const { 
-    selectedAdminId, 
-    admins, 
-    setWebView, 
+  const {
+    selectedAdminId,
+    admins,
+    setWebView,
     updateAdmin,
-    removeAdmin 
+    removeAdmin
   } = useAppContext();
 
   const [deleteModal, setDeleteModal] = React.useState<{
@@ -40,29 +40,29 @@ export const AdminDetail: React.FC = () => {
 
   const getRoleInfo = (roleId: string) => {
     const roleMap: Record<string, { label: string, desc: string }> = {
-      'product_transfers': { 
-        label: 'Product Transfers', 
-        desc: 'Authorizes and manages the transfer of physical and digital products.' 
+      'product_transfers': {
+        label: 'Product Transfers',
+        desc: 'Authorizes and manages the transfer of physical and digital products.'
       },
-      'pactvera_admin': { 
-        label: 'Pactvera Admin', 
-        desc: 'Manages access and organization of agreements and templates, but cannot send or sign Pactveras.' 
+      'pactvera_admin': {
+        label: 'Pactvera Admin',
+        desc: 'Manages access and organization of agreements and templates, but cannot send or sign Pactveras.'
       },
-      'pactvera_signer': { 
-        label: 'Pactvera Signer', 
-        desc: 'Reviews and signs Pactveras on behalf of the organization with legal authority.' 
+      'pactvera_signer': {
+        label: 'Pactvera Signer',
+        desc: 'Reviews and signs Pactveras on behalf of the organization with legal authority.'
       },
-      'tca_release': { 
-        label: 'TCA Releaser', 
-        desc: 'Authorizes the release of funds or assets (TCAs) tied to a Pactvera agreement on behalf of the organization.' 
+      'tca_release': {
+        label: 'TCA Releaser',
+        desc: 'Authorizes the release of funds or assets (TCAs) tied to a Pactvera agreement on behalf of the organization.'
       },
-      'kyb_verifier': { 
-        label: 'KYB Verifier', 
-        desc: 'Verifies business identity and compliance documentation for onboarding.' 
+      'kyb_verifier': {
+        label: 'KYB Verifier',
+        desc: 'Verifies business identity and compliance documentation for onboarding.'
       },
-      'org_admin': { 
-        label: 'Org Admin', 
-        desc: 'Full administrative access to organization settings and user management.' 
+      'org_admin': {
+        label: 'Org Admin',
+        desc: 'Full administrative access to organization settings and user management.'
       },
       'pactvera_sender': {
         label: 'Pactvera Sender',
@@ -84,7 +84,7 @@ export const AdminDetail: React.FC = () => {
 
     if (deleteModal.type === 'role') {
       updatedRoles = updatedRoles.filter(r => r !== deleteModal.id);
-      
+
       // Handle associated permissions
       if (deleteModal.id === 'product_transfers') {
         updatedPerms.erc721 = false;
@@ -125,7 +125,7 @@ export const AdminDetail: React.FC = () => {
   const triggerRoleDelete = (roleId: string) => {
     const info = getRoleInfo(roleId);
     let extraWarning = "";
-    
+
     if (roleId === 'product_transfers') {
       extraWarning = " This will also remove the 'ERC721 Minting' wallet permission.";
     } else if (roleId === 'pactvera_admin' || roleId === 'pactvera_signer') {
@@ -289,7 +289,7 @@ export const AdminDetail: React.FC = () => {
             )}
             {admin.walletPerms.erc721 && admin.walletPerms.erc721Tokens.length > 0 && (
               <tr>
-                <td className="role-name-cell">ERC721 Minting</td>
+                <td className="role-name-cell">Transfers — ERC721</td>
                 <td className="role-desc-cell">Authorized for: {admin.walletPerms.erc721Tokens.join(', ')}</td>
                 <td className="actions-cell">
                   <button className="action-dots-btn" onClick={() => triggerPermissionDelete('erc721', 'ERC721 Minting')}>
