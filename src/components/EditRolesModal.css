@@ -1,0 +1,146 @@
+/* Reuse styles from InviteModal and add tweaks for EditRolesModal */
+
+.edit-roles-modal {
+  width: 560px !important;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-roles-modal .modal-body {
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+/* Ensure dropdown works correctly in scrollable modal body */
+.edit-roles-modal .dropdown-container {
+  position: relative;
+}
+
+.edit-roles-modal .dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.edit-roles-modal .wallet-perm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #fcfcfc;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 12px;
+}
+
+.edit-roles-modal .perm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-roles-modal .perm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.edit-roles-modal .perm-config-box {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  margin-left: 32px;
+}
+
+.edit-roles-modal .config-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+
+.edit-roles-modal .config-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.edit-roles-modal .currency-prefix {
+  position: absolute;
+  left: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.edit-roles-modal .config-input {
+  width: 100%;
+  padding: 10px 12px 10px 28px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.edit-roles-modal .token-chip-group {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-roles-modal .token-chip {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-roles-modal .token-chip.active {
+  background: #f0fdf4;
+  border-color: #8bc34a;
+  color: #2e7d32;
+}
+
+.edit-roles-modal .token-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.edit-roles-modal .token-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+}
+
+.edit-roles-modal .locked {
+  opacity: 0.6;
+}
+
+.edit-roles-modal .locked-icon {
+  color: #999;
+}

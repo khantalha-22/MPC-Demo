@@ -39,22 +39,44 @@ export const InviteModal: React.FC = () => {
   const [permSign, setPermSign] = useState(false);
 
   const hasProductTransfers = selectedRoles.has('product_transfers');
-  const hasPactveraRoles = selectedRoles.has('pactvera_admin') || selectedRoles.has('pactvera_signer');
+  const hasPactveraRoles = selectedRoles.has('pactvera_admin') || selectedRoles.has('pactvera_signer') || selectedRoles.has('tca_release');
 
   useEffect(() => {
-    if (hasProductTransfers) {
+    // Reset permissions that are controlled by roles if they are not enabled by any current role
+    const hasOrgAdmin = selectedRoles.has('org_admin');
+    const hasProductTransfers = selectedRoles.has('product_transfers');
+    const hasPactveraRoles = selectedRoles.has('pactvera_admin') || selectedRoles.has('pactvera_signer') || selectedRoles.has('tca_release');
+
+    if (hasOrgAdmin) {
+      setPermErc20(true);
       setPermErc721(true);
-      if (!erc721Tokens.includes('Product VDT')) {
-        setErc721Tokens(prev => [...prev, 'Product VDT']);
+      setPermBurn(true);
+      setPermSign(true);
+      if (!erc721Tokens.includes('Product VDT')) setErc721Tokens(prev => [...prev, 'Product VDT']);
+      if (!burnTokens.includes('Pactvera VDT')) setBurnTokens(prev => [...prev, 'Pactvera VDT']);
+    } else {
+      // Logic for granular roles
+      setPermErc721(hasProductTransfers);
+      if (hasProductTransfers) {
+        if (!erc721Tokens.includes('Product VDT')) setErc721Tokens(prev => [...prev, 'Product VDT']);
+      } else {
+        setErc721Tokens([]);
+      }
+
+      setPermSign(hasPactveraRoles);
+      setPermBurn(hasPactveraRoles);
+      if (hasPactveraRoles) {
+        if (!burnTokens.includes('Pactvera VDT')) setBurnTokens(prev => [...prev, 'Pactvera VDT']);
+      } else {
+        setBurnTokens([]);
+      }
+
+      // If neither high role is selected, ERC20 should be false
+      if (!hasOrgAdmin) {
+        setPermErc20(false);
       }
     }
-  }, [hasProductTransfers]);
-
-  useEffect(() => {
-    if (hasPactveraRoles) {
-      setPermSign(true);
-    }
-  }, [hasPactveraRoles]);
+  }, [selectedRoles]);
 
   const toggleRole = (id: string) => {
     const newRoles = new Set(selectedRoles);

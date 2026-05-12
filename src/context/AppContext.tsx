@@ -95,7 +95,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       email: 'jane.doe@exp.com',
       roles: ['pactvera_admin', 'product_transfers'],
       walletPerms: {
-        erc20: true,
+        erc20: false,
         erc20Amount: '5000',
         erc721: true,
         erc721Tokens: ['Product VDT'],

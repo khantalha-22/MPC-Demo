@@ -1,8 +1,9 @@
 import React from 'react';
 import './AdminDetail.css';
-import { ArrowLeft, Plus, Trash2, Shield, Wallet } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Shield, Wallet, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { EditRolesModal } from './EditRolesModal';
 
 export const AdminDetail: React.FC = () => {
   const {
@@ -26,6 +27,8 @@ export const AdminDetail: React.FC = () => {
     name: '',
     warning: ''
   });
+
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   const admin = admins.find(a => a.id === selectedAdminId);
 
@@ -63,14 +66,6 @@ export const AdminDetail: React.FC = () => {
       'org_admin': {
         label: 'Org Admin',
         desc: 'Full administrative access to organization settings and user management.'
-      },
-      'pactvera_sender': {
-        label: 'Pactvera Sender',
-        desc: 'Creates and sends Pactveras within approved folders, without signing or releasing value. Creates and uses templates as needed.'
-      },
-      'president': {
-        label: 'President',
-        desc: 'Executive oversight and final authority on all organizational operations.'
       }
     };
     return roleMap[roleId] || { label: roleId, desc: '-' };
@@ -89,28 +84,37 @@ export const AdminDetail: React.FC = () => {
       if (deleteModal.id === 'product_transfers') {
         updatedPerms.erc721 = false;
         updatedPerms.erc721Tokens = [];
-      } else if (deleteModal.id === 'pactvera_admin' || deleteModal.id === 'pactvera_signer') {
-        // Only remove signing if BOTH pactvera roles are gone
-        const hasOtherPactveraRole = updatedRoles.some(r => r === 'pactvera_admin' || r === 'pactvera_signer');
-        if (!hasOtherPactveraRole) {
+      } else if (['pactvera_admin', 'pactvera_signer', 'tca_release', 'org_admin'].includes(deleteModal.id)) {
+        // Only remove signing/burning if ALL pactvera-related roles AND org_admin are gone
+        const hasOtherHighRole = updatedRoles.some(r => ['pactvera_admin', 'pactvera_signer', 'tca_release', 'org_admin'].includes(r));
+        if (!hasOtherHighRole) {
           updatedPerms.signing = false;
+          updatedPerms.burnVdt = false;
+          updatedPerms.burnVdtTokens = [];
+        }
+
+        // If org_admin is removed, check if other roles still need erc20/erc721
+        if (deleteModal.id === 'org_admin') {
+          const hasProductTransfers = updatedRoles.includes('product_transfers');
+          if (!hasProductTransfers) {
+            updatedPerms.erc20 = false;
+            updatedPerms.erc721 = false;
+            updatedPerms.erc721Tokens = [];
+          }
         }
       }
     } else if (deleteModal.type === 'permission') {
-      const permKey = deleteModal.id as keyof typeof admin.walletPerms;
-      if (typeof updatedPerms[permKey] === 'boolean') {
-        (updatedPerms[permKey] as any) = false;
-      } else if (Array.isArray(updatedPerms[permKey])) {
-        (updatedPerms[permKey] as any) = [];
-      } else {
-        (updatedPerms[permKey] as any) = '';
-      }
-
-      // Handle associated roles
-      if (deleteModal.id === 'erc721') {
-        updatedRoles = updatedRoles.filter(r => r !== 'product_transfers');
-      } else if (deleteModal.id === 'signing') {
-        updatedRoles = updatedRoles.filter(r => r !== 'pactvera_admin' && r !== 'pactvera_signer');
+      const permKey = deleteModal.id as keyof typeof updatedPerms;
+      if (permKey === 'erc20') {
+        updatedPerms.erc20 = false;
+      } else if (permKey === 'erc721') {
+        updatedPerms.erc721 = false;
+        updatedPerms.erc721Tokens = [];
+      } else if (permKey === 'signing') {
+        updatedPerms.signing = false;
+      } else if (permKey === 'burnVdt') {
+        updatedPerms.burnVdt = false;
+        updatedPerms.burnVdtTokens = [];
       }
     } else if (deleteModal.type === 'admin') {
       removeAdmin(admin.id);
@@ -127,11 +131,15 @@ export const AdminDetail: React.FC = () => {
     let extraWarning = "";
 
     if (roleId === 'product_transfers') {
-      extraWarning = " This will also remove the 'ERC721 Minting' wallet permission.";
-    } else if (roleId === 'pactvera_admin' || roleId === 'pactvera_signer') {
-      const otherRole = roleId === 'pactvera_admin' ? 'pactvera_signer' : 'pactvera_admin';
-      if (!admin?.roles.includes(otherRole)) {
-        extraWarning = " This will also remove the 'Pactvera Signing' wallet permission.";
+      extraWarning = " This will also remove associated ERC721 wallet permissions.";
+    } else if (['pactvera_admin', 'pactvera_signer', 'tca_release', 'org_admin'].includes(roleId)) {
+      const highRoles = ['pactvera_admin', 'pactvera_signer', 'tca_release', 'org_admin'];
+      const otherHighRoles = highRoles.filter(r => r !== roleId);
+      const hasOtherRole = admin?.roles.some(r => otherHighRoles.includes(r));
+      if (!hasOtherRole) {
+        extraWarning = roleId === 'org_admin' 
+          ? " This will also remove ALL wallet permissions assigned to this administrator."
+          : " This will also remove Pactvera Signing and VDT Burn wallet permissions.";
       }
     }
 
@@ -145,19 +153,12 @@ export const AdminDetail: React.FC = () => {
   };
 
   const triggerPermissionDelete = (permKey: string, label: string) => {
-    let extraWarning = "";
-    if (permKey === 'erc721') {
-      extraWarning = " This will also remove the 'Product Transfers' role.";
-    } else if (permKey === 'signing') {
-      extraWarning = " This will also remove the 'Pactvera Admin' and 'Pactvera Signer' roles.";
-    }
-
     setDeleteModal({
       isOpen: true,
       type: 'permission',
       id: permKey,
       name: label,
-      warning: extraWarning
+      warning: " This will revoke this specific wallet authority from the administrator."
     });
   };
 
@@ -169,6 +170,14 @@ export const AdminDetail: React.FC = () => {
       name: admin?.name || ''
     });
   };
+
+  const handleSaveRoles = (updatedRoles: string[], updatedPerms: any) => {
+    if (!admin) return;
+    updateAdmin({ ...admin, roles: updatedRoles, walletPerms: updatedPerms });
+    setIsEditModalOpen(false);
+  };
+
+
 
   return (
     <div className="admin-detail-container">
@@ -214,9 +223,8 @@ export const AdminDetail: React.FC = () => {
           <h2>User Roles</h2>
         </div>
         <div className="section-actions">
-          <button className="btn-add-role">
-            <Plus size={16} />
-            <span>Add Role</span>
+          <button className="btn-add-role" onClick={() => setIsEditModalOpen(true)}>
+            <span>Update</span>
           </button>
           <button className="btn-remove-user" onClick={triggerAdminDelete}>
             <Trash2 size={16} />
@@ -229,8 +237,9 @@ export const AdminDetail: React.FC = () => {
         <table className="detail-table">
           <thead>
             <tr>
-              <th style={{ width: '25%' }}>Roles</th>
-              <th style={{ width: '65%' }}>Description</th>
+              <th style={{ width: '20%' }}>Roles</th>
+              <th style={{ width: '40%' }}>Description</th>
+              <th style={{ width: '30%' }}>Wallet Permissions</th>
               <th style={{ width: '10%', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -238,10 +247,51 @@ export const AdminDetail: React.FC = () => {
             {admin.roles.length > 0 ? (
               admin.roles.map(roleId => {
                 const info = getRoleInfo(roleId);
+                
+                // Get permissions associated with this role
+                const associatedPerms: React.ReactNode[] = [];
+                
+                if (roleId === 'product_transfers') {
+                  if (admin.walletPerms.erc721) {
+                    associatedPerms.push(
+                      <div key="erc721" className="perm-tag">
+                        ERC721: {admin.walletPerms.erc721Tokens.join(', ')}
+                      </div>
+                    );
+                  }
+                } else if (roleId === 'pactvera_admin' || roleId === 'pactvera_signer' || roleId === 'tca_release') {
+                  if (admin.walletPerms.signing) {
+                    associatedPerms.push(
+                      <div key="signing" className="perm-tag">Pactvera Signing</div>
+                    );
+                  }
+                  if (admin.walletPerms.burnVdt) {
+                    associatedPerms.push(
+                      <div key="burn" className="perm-tag">
+                        Burn VDT: {admin.walletPerms.burnVdtTokens.join(', ')}
+                      </div>
+                    );
+                  }
+                } else if (roleId === 'org_admin') {
+                  if (admin.walletPerms.erc20) associatedPerms.push(<div key="erc20" className="perm-tag">ERC20 Transfer</div>);
+                  if (admin.walletPerms.erc721) associatedPerms.push(<div key="erc721" className="perm-tag">ERC721 Transfer</div>);
+                  if (admin.walletPerms.signing) associatedPerms.push(<div key="signing" className="perm-tag">Pactvera Signing</div>);
+                  if (admin.walletPerms.burnVdt) associatedPerms.push(<div key="burn" className="perm-tag">Burn Authority</div>);
+                }
+
                 return (
                   <tr key={roleId}>
                     <td className="role-name-cell">{info.label}</td>
                     <td className="role-desc-cell">{info.desc}</td>
+                    <td className="role-perms-cell">
+                      {associatedPerms.length > 0 ? (
+                        <div className="perms-list">
+                          {associatedPerms}
+                        </div>
+                      ) : (
+                        <span className="no-perms">-</span>
+                      )}
+                    </td>
                     <td className="actions-cell">
                       <button className="action-dots-btn" onClick={() => triggerRoleDelete(roleId)}>
                         <Trash2 size={16} color="#ef5350" />
@@ -252,79 +302,83 @@ export const AdminDetail: React.FC = () => {
               })
             ) : (
               <tr>
-                <td colSpan={3} className="empty-state">No roles assigned</td>
+                <td colSpan={4} className="empty-state">No roles assigned</td>
               </tr>
             )}
-          </tbody>
-        </table>
-      </div>
+            
+            {/* Handle orphan permissions if any (e.g. ERC20 without Product Transfers) */}
+            {(() => {
+              const orphans: React.ReactNode[] = [];
+              
+              // Check if permissions are being shown in any role row
+              const hasOrgAdmin = admin.roles.includes('org_admin');
+              const hasPactveraGroup = admin.roles.some(r => ['pactvera_admin', 'pactvera_signer', 'tca_release'].includes(r));
+              const hasProductTransfers = admin.roles.includes('product_transfers');
 
-      <div className="section-header mt-32">
-        <div className="section-title">
-          <Wallet size={20} className="section-icon" />
-          <h2>Wallet Permissions</h2>
-        </div>
-      </div>
+              // ERC20 is only shown in Org Admin row
+              if (!hasOrgAdmin && admin.walletPerms.erc20) {
+                orphans.push(
+                  <div key="o-erc20" className="perm-tag with-action">
+                    <span>ERC20 Transfer ({admin.walletPerms.erc20Amount})</span>
+                    <button className="tag-delete-btn" onClick={() => triggerPermissionDelete('erc20', 'ERC20 Transfer')}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              }
 
-      <div className="detail-table-container">
-        <table className="detail-table">
-          <thead>
-            <tr>
-              <th style={{ width: '25%' }}>Permission</th>
-              <th style={{ width: '65%' }}>Value/Scope</th>
-              <th style={{ width: '10%', textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {admin.walletPerms.erc20 && (
-              <tr>
-                <td className="role-name-cell">ERC20 Transfer</td>
-                <td className="role-desc-cell">Allowed up to {admin.walletPerms.erc20Amount} units</td>
-                <td className="actions-cell">
-                  <button className="action-dots-btn" onClick={() => triggerPermissionDelete('erc20', 'ERC20 Transfer')}>
-                    <Trash2 size={16} color="#ef5350" />
-                  </button>
-                </td>
-              </tr>
-            )}
-            {admin.walletPerms.erc721 && admin.walletPerms.erc721Tokens.length > 0 && (
-              <tr>
-                <td className="role-name-cell">Transfers — ERC721</td>
-                <td className="role-desc-cell">Authorized for: {admin.walletPerms.erc721Tokens.join(', ')}</td>
-                <td className="actions-cell">
-                  <button className="action-dots-btn" onClick={() => triggerPermissionDelete('erc721', 'ERC721 Minting')}>
-                    <Trash2 size={16} color="#ef5350" />
-                  </button>
-                </td>
-              </tr>
-            )}
-            {admin.walletPerms.burnVdt && admin.walletPerms.burnVdtTokens.length > 0 && (
-              <tr>
-                <td className="role-name-cell">VDT Burn Authority</td>
-                <td className="role-desc-cell">Authorized for: {admin.walletPerms.burnVdtTokens.join(', ')}</td>
-                <td className="actions-cell">
-                  <button className="action-dots-btn" onClick={() => triggerPermissionDelete('burnVdt', 'VDT Burn Authority')}>
-                    <Trash2 size={16} color="#ef5350" />
-                  </button>
-                </td>
-              </tr>
-            )}
-            {admin.walletPerms.signing && (
-              <tr>
-                <td className="role-name-cell">Pactvera Signing</td>
-                <td className="role-desc-cell">Full authority to sign and execute Pactvera agreements</td>
-                <td className="actions-cell">
-                  <button className="action-dots-btn" onClick={() => triggerPermissionDelete('signing', 'Pactvera Signing')}>
-                    <Trash2 size={16} color="#ef5350" />
-                  </button>
-                </td>
-              </tr>
-            )}
-            {!admin.walletPerms.erc20 && !admin.walletPerms.erc721 && !admin.walletPerms.burnVdt && !admin.walletPerms.signing && (
-              <tr>
-                <td colSpan={3} className="empty-state">No wallet permissions granted</td>
-              </tr>
-            )}
+              // ERC721 is shown in Product Transfers and Org Admin rows
+              if (!hasOrgAdmin && !hasProductTransfers && admin.walletPerms.erc721) {
+                orphans.push(
+                  <div key="o-erc721" className="perm-tag with-action">
+                    <span>ERC721: {admin.walletPerms.erc721Tokens.join(', ')}</span>
+                    <button className="tag-delete-btn" onClick={() => triggerPermissionDelete('erc721', 'ERC721 Transfer')}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              }
+
+              // Signing is shown in Pactvera group and Org Admin rows
+              if (!hasOrgAdmin && !hasPactveraGroup && admin.walletPerms.signing) {
+                orphans.push(
+                  <div key="o-sign" className="perm-tag with-action">
+                    <span>Pactvera Signing</span>
+                    <button className="tag-delete-btn" onClick={() => triggerPermissionDelete('signing', 'Pactvera Signing')}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              }
+
+              // Burn is shown in Pactvera group and Org Admin rows
+              if (!hasOrgAdmin && !hasPactveraGroup && admin.walletPerms.burnVdt) {
+                orphans.push(
+                  <div key="o-burn" className="perm-tag with-action">
+                    <span>Burn Authority: {admin.walletPerms.burnVdtTokens.join(', ')}</span>
+                    <button className="tag-delete-btn" onClick={() => triggerPermissionDelete('burnVdt', 'Burn Authority')}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              }
+              
+              if (orphans.length > 0) {
+                return (
+                  <tr className="orphan-perms-row">
+                    <td className="role-name-cell">General Access</td>
+                    <td className="role-desc-cell">Standalone wallet permissions not tied to a specific administrative role.</td>
+                    <td className="role-perms-cell">
+                      <div className="perms-list">{orphans}</div>
+                    </td>
+                    <td className="actions-cell">
+                      {/* Standalone perms don't have a single role to delete, maybe disable or handle differently */}
+                    </td>
+                  </tr>
+                );
+              }
+              return null;
+            })()}
           </tbody>
         </table>
       </div>
@@ -336,6 +390,12 @@ export const AdminDetail: React.FC = () => {
         message="Are you sure you want to delete the"
         itemName={`${deleteModal.name} ${deleteModal.type.charAt(0).toUpperCase() + deleteModal.type.slice(1)}`}
         warning={deleteModal.warning}
+      />
+      <EditRolesModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        admin={admin}
+        onSave={handleSaveRoles}
       />
     </div>
   );
