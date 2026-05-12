@@ -1,6 +1,6 @@
 import React from 'react';
 import './AdminDetail.css';
-import { ArrowLeft, Plus, Trash2, Shield, Wallet, X } from 'lucide-react';
+import { ArrowLeft, Trash2, Shield, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { EditRolesModal } from './EditRolesModal';
